@@ -1890,7 +1890,7 @@ export default function App() {
               <div style={{width:30,height:30,background:"linear-gradient(135deg,#FF6B00,#CC2200)",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(255,107,0,.4)"}}>
                 <svg width="13" height="13" viewBox="0 0 24 24"><polygon points="12,2 22,20 2,20" fill="#FF6B00"/><polygon points="12,8 19,20 5,20" fill="#000" opacity=".35"/></svg>
               </div>
-              <span style={{flex:1,fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:18,letterSpacing:"-1px",background:"linear-gradient(135deg,#FF9500,#FF3300)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>extej</span>
+              <span style={{flex:1,fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:18,letterSpacing:"-1px",background:"linear-gradient(135deg,#FF9500,#FF3300)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Dynamic Capital</span>
               <button onClick={()=>setMobDrawer(false)} style={{background:"none",border:"none",color:"#666",fontSize:20,lineHeight:1}}>✕</button>
             </div>
             <div style={{overflowY:"auto",flex:1,paddingBottom:16}}>
@@ -1914,7 +1914,7 @@ export default function App() {
           <div style={{width:33,height:33,background:"linear-gradient(135deg,#FF6B00,#CC2200)",borderRadius:9,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:"0 4px 14px rgba(255,107,0,.4)"}}>
             <svg width="15" height="15" viewBox="0 0 24 24"><polygon points="12,2 22,20 2,20" fill="#FF6B00"/><polygon points="12,8 19,20 5,20" fill="#000" opacity=".35"/></svg>
           </div>
-          {!collapsed&&<span style={{flex:1,fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:19,letterSpacing:"-1px",background:"linear-gradient(135deg,#FF9500,#FF3300)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>extej</span>}
+          {!collapsed&&<span style={{flex:1,fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:19,letterSpacing:"-1px",background:"linear-gradient(135deg,#FF9500,#FF3300)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>Dynamic Capital</span>}
           <button className="nb" onClick={()=>setCollapsed(!collapsed)} style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.07)",borderRadius:7,color:"#666",width:23,height:23,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0}}>{collapsed?"›":"‹"}</button>
         </div>
         <div style={{flex:1,overflowY:"auto",overflowX:"hidden",padding:"4px"}}>
