@@ -22,7 +22,8 @@ const bootstrap = () => {
     s.id = "extej-css";
     s.textContent = `
       *{box-sizing:border-box;margin:0;padding:0;}
-      ::-webkit-scrollbar{width:4px;height:4px;}
+      html,body{overflow:hidden;height:100%;}
+      ::-webkit-scrollbar{width:3px;height:3px;}
       ::-webkit-scrollbar-track{background:transparent;}
       ::-webkit-scrollbar-thumb{background:rgba(255,149,0,.22);border-radius:99px;}
       ::-webkit-scrollbar-thumb:hover{background:rgba(255,149,0,.45);}
@@ -50,6 +51,40 @@ const bootstrap = () => {
       .card{background:rgba(255,255,255,.038);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.075);border-radius:14px;}
       input::placeholder{color:#444;}
       button{cursor:pointer;}
+      @keyframes slideIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+      @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+      .mob-drawer{position:fixed;top:0;left:0;bottom:0;z-index:200;width:240px;background:rgba(4,5,8,.98);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-right:1px solid rgba(255,255,255,.07);animation:slideIn .25s cubic-bezier(.4,0,.2,1);overflow-y:auto;}
+      .mob-overlay{position:fixed;inset:0;z-index:199;background:rgba(0,0,0,.6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);animation:fadeIn .2s ease;}
+      .bot-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:150;height:62px;background:rgba(4,5,8,.97);backdrop-filter:blur(24px);border-top:1px solid rgba(255,255,255,.06);}
+      .bot-nav-inner{display:flex;align-items:center;height:100%;justify-content:space-around;padding:0 4px;}
+      .bot-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 6px;background:none;border:none;color:#444;font-size:9px;font-family:'DM Mono',monospace;min-width:44px;border-radius:10px;transition:color .15s;white-space:nowrap;}
+      .bot-btn.act{color:#FF9500;}
+      .bot-btn.act .bot-icon{background:rgba(255,149,0,.15);border:1px solid rgba(255,149,0,.3);}
+      .bot-icon{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;border:1px solid transparent;transition:all .15s;}
+      .hscroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+      .hscroll::-webkit-scrollbar{display:none;}
+      @media(max-width:768px){
+        .bot-nav{display:block!important;}
+        .desk-sidebar{display:none!important;}
+        .desk-header-extra{display:none!important;}
+        .mob-menu-btn{display:flex!important;}
+        .main-content-pad{padding:12px 12px 74px!important;}
+        .header-search-wrap{display:none!important;}
+        .ticker-bar{display:none!important;}
+        .grid-4col{grid-template-columns:1fr 1fr!important;}
+        .grid-3col{grid-template-columns:1fr!important;}
+        .grid-2col{grid-template-columns:1fr!important;}
+        .grid-trade{grid-template-columns:1fr!important;}
+        .grid-port{grid-template-columns:1fr!important;}
+        .hide-mob{display:none!important;}
+        .pair-scroll{flex-wrap:nowrap!important;overflow-x:auto!important;scrollbar-width:none!important;}
+        .order-book-mob-hide{display:none!important;}
+      }
+      @media(max-width:480px){
+        .grid-4col{grid-template-columns:1fr!important;}
+        .main-content-pad{padding:10px 10px 74px!important;}
+        .page-title-size{font-size:16px!important;}
+      }
     `;
     document.head.appendChild(s);
   }
@@ -74,12 +109,22 @@ const TICKER_DATA = [
   {sym:"ETH",val:"$1,940",chg:"+1.8%",up:true},
   {sym:"BNB",val:"$301",chg:"−0.9%",up:false},
   {sym:"SOL",val:"$138",chg:"+3.2%",up:true},
+  {sym:"DOGE",val:"$0.0821",chg:"+5.7%",up:true},
+  {sym:"SHIB",val:"$0.00000924",chg:"+8.2%",up:true},
+  {sym:"PEPE",val:"$0.000011",chg:"+14.3%",up:true},
+  {sym:"WIF",val:"$2.34",chg:"+11.2%",up:true},
   {sym:"ADA",val:"$0.43",chg:"−1.1%",up:false},
   {sym:"DOT",val:"$6.80",chg:"+0.5%",up:true},
   {sym:"AVAX",val:"$35",chg:"+4.1%",up:true},
   {sym:"MATIC",val:"$0.89",chg:"+2.0%",up:true},
   {sym:"LINK",val:"$14.20",chg:"+1.3%",up:true},
   {sym:"XRP",val:"$0.61",chg:"−0.7%",up:false},
+  {sym:"ARB",val:"$1.12",chg:"+3.4%",up:true},
+  {sym:"OP",val:"$2.18",chg:"+2.9%",up:true},
+  {sym:"INJ",val:"$28.40",chg:"+6.1%",up:true},
+  {sym:"NEAR",val:"$4.21",chg:"+1.7%",up:true},
+  {sym:"BONK",val:"$0.0000198",chg:"+7.6%",up:true},
+  {sym:"TIA",val:"$8.92",chg:"−2.3%",up:false},
 ];
 
 const NAV = [
@@ -165,8 +210,8 @@ const Badge = ({c,label}:{c:string;label:string}) => (
   <span style={{background:c+"18",border:`1px solid ${c}33`,color:c,borderRadius:20,padding:"2px 10px",fontSize:10,fontFamily:"'DM Mono',monospace"}}>{label}</span>
 );
 
-const GlassCard = ({children,style={},anim=0}:{children:React.ReactNode;style?:React.CSSProperties;anim?:number}) => (
-  <div className="card" style={{padding:"20px",animation:`fadeUp .35s ease ${anim*0.06}s both`,...style}}>{children}</div>
+const GlassCard = ({children,style={},anim=0,cls=""}:{children:React.ReactNode;style?:React.CSSProperties;anim?:number;cls?:string}) => (
+  <div className={`card${cls?" "+cls:""}`} style={{padding:"20px",animation:`fadeUp .35s ease ${anim*0.06}s both`,...style}}>{children}</div>
 );
 
 // ══════════════════════════════════════════════════════════
@@ -193,7 +238,7 @@ function MarketsPage() {
     <div style={{display:"flex",flexDirection:"column",gap:18}}>
       <SectionTitle t="Markets" sub="Live prices across all tracked assets"/>
       {/* Stats row */}
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}} className="grid-4col">
         {[
           {label:"Total Market Cap",val:"$1.82T",chg:"+3.2%",up:true},
           {label:"24h Volume",val:"$98.4B",chg:"+12.1%",up:true},
@@ -371,6 +416,289 @@ const PAIR_DATA: Record<string, PairInfo> = {
       {date:"20 Jul 08:30",side:"Buy", price:"$29.5",amt:"200 AVAX",filled:"100%"},
     ],
   },
+  // ── MEME COINS ──
+  "DOGE/USDT": {
+    label:"DOGE/USDT", baseSym:"DOGE", icon:"Ð", color:"#C2A633",
+    price:0.0821, chg24pct:5.70, chgAmt:0.00442,
+    vol:"$2.1B", high24:0.0894, low24:0.0763,
+    vol24:"25.6B DOGE", mktcap:"$11.7B", spreadPct:0.04,
+    amtDecimals:0, priceDecimals:5, volatility:3.2,
+    seeds:{"1H":6001,"4H":6002,"1D":6003,"1W":6004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 14:00",side:"Buy", price:"$0.0780",amt:"5000 DOGE",filled:"100%"},
+      {date:"22 Jul 11:20",side:"Sell",price:"$0.0910",amt:"10000 DOGE",filled:"0%"},
+      {date:"21 Jul 16:45",side:"Buy", price:"$0.0710",amt:"20000 DOGE",filled:"100%"},
+    ],
+  },
+  "SHIB/USDT": {
+    label:"SHIB/USDT", baseSym:"SHIB", icon:"🐕", color:"#FF5500",
+    price:0.00000924, chg24pct:8.20, chgAmt:0.000000701,
+    vol:"$0.9B", high24:0.0000102, low24:0.00000841,
+    vol24:"98T SHIB", mktcap:"$5.4B", spreadPct:0.06,
+    amtDecimals:0, priceDecimals:8, volatility:5.0,
+    seeds:{"1H":7001,"4H":7002,"1D":7003,"1W":7004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 13:10",side:"Buy", price:"$0.00000880",amt:"10M SHIB",filled:"60%"},
+      {date:"22 Jul 09:00",side:"Sell",price:"$0.0000112",amt:"5M SHIB",filled:"0%"},
+      {date:"20 Jul 10:30",side:"Buy", price:"$0.00000750",amt:"50M SHIB",filled:"100%"},
+    ],
+  },
+  "PEPE/USDT": {
+    label:"PEPE/USDT", baseSym:"PEPE", icon:"🐸", color:"#00B74A",
+    price:0.0000112, chg24pct:14.30, chgAmt:0.00000140,
+    vol:"$1.4B", high24:0.0000138, low24:0.00000942,
+    vol24:"125T PEPE", mktcap:"$4.7B", spreadPct:0.07,
+    amtDecimals:0, priceDecimals:8, volatility:6.5,
+    seeds:{"1H":8001,"4H":8002,"1D":8003,"1W":8004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 12:00",side:"Buy", price:"$0.0000095",amt:"100M PEPE",filled:"100%"},
+      {date:"22 Jul 18:00",side:"Sell",price:"$0.0000145",amt:"50M PEPE",filled:"0%"},
+      {date:"21 Jul 07:00",side:"Buy", price:"$0.0000081",amt:"500M PEPE",filled:"100%"},
+    ],
+  },
+  "WIF/USDT": {
+    label:"WIF/USDT", baseSym:"WIF", icon:"🎩", color:"#E879F9",
+    price:2.340, chg24pct:11.20, chgAmt:0.237,
+    vol:"$0.6B", high24:2.620, low24:2.030,
+    vol24:"262M WIF", mktcap:"$2.3B", spreadPct:0.05,
+    amtDecimals:1, priceDecimals:3, volatility:4.8,
+    seeds:{"1H":9001,"4H":9002,"1D":9003,"1W":9004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 11:00",side:"Buy", price:"$2.10",amt:"500 WIF",filled:"80%"},
+      {date:"22 Jul 14:30",side:"Sell",price:"$2.80",amt:"200 WIF",filled:"0%"},
+      {date:"21 Jul 09:15",side:"Buy", price:"$1.85",amt:"1000 WIF",filled:"100%"},
+    ],
+  },
+  "BONK/USDT": {
+    label:"BONK/USDT", baseSym:"BONK", icon:"🔥", color:"#FF8C00",
+    price:0.0000198, chg24pct:7.60, chgAmt:0.00000140,
+    vol:"$0.3B", high24:0.0000224, low24:0.0000178,
+    vol24:"15T BONK", mktcap:"$1.3B", spreadPct:0.07,
+    amtDecimals:0, priceDecimals:8, volatility:5.5,
+    seeds:{"1H":10001,"4H":10002,"1D":10003,"1W":10004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 10:00",side:"Buy", price:"$0.0000180",amt:"500M BONK",filled:"100%"},
+      {date:"22 Jul 16:00",side:"Sell",price:"$0.0000240",amt:"200M BONK",filled:"0%"},
+      {date:"21 Jul 14:00",side:"Buy", price:"$0.0000155",amt:"1B BONK",filled:"100%"},
+    ],
+  },
+  "FLOKI/USDT": {
+    label:"FLOKI/USDT", baseSym:"FLOKI", icon:"⚡", color:"#FF6B35",
+    price:0.000178, chg24pct:9.40, chgAmt:0.0000153,
+    vol:"$0.2B", high24:0.000198, low24:0.000158,
+    vol24:"1.1T FLOKI", mktcap:"$1.7B", spreadPct:0.08,
+    amtDecimals:0, priceDecimals:7, volatility:5.8,
+    seeds:{"1H":11001,"4H":11002,"1D":11003,"1W":11004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 09:00",side:"Buy", price:"$0.000162",amt:"10M FLOKI",filled:"75%"},
+      {date:"22 Jul 15:00",side:"Sell",price:"$0.000210",amt:"5M FLOKI",filled:"0%"},
+      {date:"20 Jul 11:00",side:"Buy", price:"$0.000141",amt:"50M FLOKI",filled:"100%"},
+    ],
+  },
+  // ── ALTCOINS ──
+  "XRP/USDT": {
+    label:"XRP/USDT", baseSym:"XRP", icon:"✕", color:"#0085C3",
+    price:0.612, chg24pct:-0.70, chgAmt:-0.00432,
+    vol:"$1.4B", high24:0.641, low24:0.594,
+    vol24:"2.3B XRP", mktcap:"$33.1B", spreadPct:0.025,
+    amtDecimals:1, priceDecimals:4, volatility:1.6,
+    seeds:{"1H":12001,"4H":12002,"1D":12003,"1W":12004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 08:40",side:"Buy", price:"$0.590",amt:"5000 XRP",filled:"100%"},
+      {date:"22 Jul 13:20",side:"Sell",price:"$0.660",amt:"3000 XRP",filled:"0%"},
+      {date:"21 Jul 10:00",side:"Buy", price:"$0.570",amt:"10000 XRP",filled:"100%"},
+    ],
+  },
+  "ADA/USDT": {
+    label:"ADA/USDT", baseSym:"ADA", icon:"A", color:"#0033AD",
+    price:0.431, chg24pct:-1.10, chgAmt:-0.00481,
+    vol:"$0.4B", high24:0.452, low24:0.418,
+    vol24:"940M ADA", mktcap:"$15.2B", spreadPct:0.03,
+    amtDecimals:1, priceDecimals:4, volatility:1.8,
+    seeds:{"1H":13001,"4H":13002,"1D":13003,"1W":13004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 07:30",side:"Buy", price:"$0.415",amt:"2000 ADA",filled:"100%"},
+      {date:"22 Jul 12:00",side:"Sell",price:"$0.470",amt:"1000 ADA",filled:"0%"},
+      {date:"21 Jul 08:00",side:"Buy", price:"$0.398",amt:"5000 ADA",filled:"100%"},
+    ],
+  },
+  "DOT/USDT": {
+    label:"DOT/USDT", baseSym:"DOT", icon:"●", color:"#E6007A",
+    price:6.80, chg24pct:0.50, chgAmt:0.034,
+    vol:"$0.3B", high24:7.12, low24:6.61,
+    vol24:"44M DOT", mktcap:"$9.8B", spreadPct:0.03,
+    amtDecimals:2, priceDecimals:3, volatility:2.0,
+    seeds:{"1H":14001,"4H":14002,"1D":14003,"1W":14004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 11:50",side:"Buy", price:"$6.50",amt:"100 DOT",filled:"100%"},
+      {date:"22 Jul 16:40",side:"Sell",price:"$7.40",amt:"50 DOT",filled:"0%"},
+      {date:"21 Jul 13:00",side:"Buy", price:"$6.10",amt:"200 DOT",filled:"100%"},
+    ],
+  },
+  "LINK/USDT": {
+    label:"LINK/USDT", baseSym:"LINK", icon:"🔗", color:"#2A5ADA",
+    price:14.20, chg24pct:1.30, chgAmt:0.182,
+    vol:"$0.5B", high24:14.88, low24:13.72,
+    vol24:"35M LINK", mktcap:"$8.5B", spreadPct:0.025,
+    amtDecimals:2, priceDecimals:3, volatility:2.2,
+    seeds:{"1H":15001,"4H":15002,"1D":15003,"1W":15004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 10:20",side:"Buy", price:"$13.80",amt:"50 LINK",filled:"100%"},
+      {date:"22 Jul 08:00",side:"Sell",price:"$15.50",amt:"30 LINK",filled:"0%"},
+      {date:"21 Jul 12:30",side:"Buy", price:"$12.90",amt:"100 LINK",filled:"100%"},
+    ],
+  },
+  "NEAR/USDT": {
+    label:"NEAR/USDT", baseSym:"NEAR", icon:"Ⓝ", color:"#00C08B",
+    price:4.21, chg24pct:1.70, chgAmt:0.0703,
+    vol:"$0.3B", high24:4.48, low24:4.02,
+    vol24:"71M NEAR", mktcap:"$5.1B", spreadPct:0.04,
+    amtDecimals:1, priceDecimals:3, volatility:2.8,
+    seeds:{"1H":16001,"4H":16002,"1D":16003,"1W":16004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 09:10",side:"Buy", price:"$3.95",amt:"200 NEAR",filled:"100%"},
+      {date:"22 Jul 11:00",side:"Sell",price:"$4.60",amt:"100 NEAR",filled:"0%"},
+      {date:"20 Jul 14:00",side:"Buy", price:"$3.72",amt:"500 NEAR",filled:"100%"},
+    ],
+  },
+  "APT/USDT": {
+    label:"APT/USDT", baseSym:"APT", icon:"◬", color:"#00D4FF",
+    price:8.14, chg24pct:2.90, chgAmt:0.229,
+    vol:"$0.4B", high24:8.72, low24:7.81,
+    vol24:"49M APT", mktcap:"$3.9B", spreadPct:0.04,
+    amtDecimals:1, priceDecimals:3, volatility:3.1,
+    seeds:{"1H":17001,"4H":17002,"1D":17003,"1W":17004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 08:00",side:"Buy", price:"$7.80",amt:"50 APT",filled:"100%"},
+      {date:"22 Jul 10:00",side:"Sell",price:"$9.20",amt:"25 APT",filled:"0%"},
+      {date:"21 Jul 15:00",side:"Buy", price:"$7.20",amt:"100 APT",filled:"100%"},
+    ],
+  },
+  "ATOM/USDT": {
+    label:"ATOM/USDT", baseSym:"ATOM", icon:"⚛", color:"#6F4CFF",
+    price:9.42, chg24pct:-0.80, chgAmt:-0.076,
+    vol:"$0.2B", high24:9.88, low24:9.11,
+    vol24:"21M ATOM", mktcap:"$3.7B", spreadPct:0.035,
+    amtDecimals:2, priceDecimals:3, volatility:2.4,
+    seeds:{"1H":18001,"4H":18002,"1D":18003,"1W":18004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 07:00",side:"Buy", price:"$9.00",amt:"30 ATOM",filled:"100%"},
+      {date:"22 Jul 17:00",side:"Sell",price:"$10.40",amt:"20 ATOM",filled:"0%"},
+      {date:"20 Jul 09:00",side:"Buy", price:"$8.50",amt:"80 ATOM",filled:"100%"},
+    ],
+  },
+  "LTC/USDT": {
+    label:"LTC/USDT", baseSym:"LTC", icon:"Ł", color:"#BFBBBB",
+    price:72.40, chg24pct:-1.40, chgAmt:-1.03,
+    vol:"$0.4B", high24:75.20, low24:70.80,
+    vol24:"5.5M LTC", mktcap:"$5.4B", spreadPct:0.022,
+    amtDecimals:3, priceDecimals:2, volatility:1.7,
+    seeds:{"1H":19001,"4H":19002,"1D":19003,"1W":19004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 06:30",side:"Buy", price:"$70.00",amt:"5 LTC",filled:"100%"},
+      {date:"22 Jul 09:00",side:"Sell",price:"$78.00",amt:"2 LTC",filled:"0%"},
+      {date:"21 Jul 11:00",side:"Buy", price:"$67.50",amt:"10 LTC",filled:"100%"},
+    ],
+  },
+  // ── LAYER 2 / DEFI ──
+  "ARB/USDT": {
+    label:"ARB/USDT", baseSym:"ARB", icon:"⊛", color:"#28A0F0",
+    price:1.12, chg24pct:3.40, chgAmt:0.0368,
+    vol:"$0.5B", high24:1.18, low24:1.06,
+    vol24:"446M ARB", mktcap:"$4.5B", spreadPct:0.04,
+    amtDecimals:1, priceDecimals:4, volatility:3.0,
+    seeds:{"1H":20001,"4H":20002,"1D":20003,"1W":20004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 12:40",side:"Buy", price:"$1.05",amt:"500 ARB",filled:"100%"},
+      {date:"22 Jul 10:20",side:"Sell",price:"$1.24",amt:"300 ARB",filled:"0%"},
+      {date:"21 Jul 08:50",side:"Buy", price:"$0.98",amt:"1000 ARB",filled:"100%"},
+    ],
+  },
+  "OP/USDT": {
+    label:"OP/USDT", baseSym:"OP", icon:"🔴", color:"#FF0420",
+    price:2.18, chg24pct:2.90, chgAmt:0.0613,
+    vol:"$0.3B", high24:2.32, low24:2.08,
+    vol24:"138M OP", mktcap:"$2.9B", spreadPct:0.04,
+    amtDecimals:1, priceDecimals:4, volatility:3.2,
+    seeds:{"1H":21001,"4H":21002,"1D":21003,"1W":21004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 11:10",side:"Buy", price:"$2.05",amt:"200 OP",filled:"100%"},
+      {date:"22 Jul 13:40",side:"Sell",price:"$2.45",amt:"100 OP",filled:"0%"},
+      {date:"21 Jul 09:30",side:"Buy", price:"$1.90",amt:"500 OP",filled:"100%"},
+    ],
+  },
+  "INJ/USDT": {
+    label:"INJ/USDT", baseSym:"INJ", icon:"⬡", color:"#00BAFF",
+    price:28.40, chg24pct:6.10, chgAmt:1.635,
+    vol:"$0.4B", high24:30.80, low24:26.20,
+    vol24:"14M INJ", mktcap:"$2.8B", spreadPct:0.04,
+    amtDecimals:2, priceDecimals:3, volatility:3.8,
+    seeds:{"1H":22001,"4H":22002,"1D":22003,"1W":22004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 10:50",side:"Buy", price:"$26.50",amt:"10 INJ",filled:"100%"},
+      {date:"22 Jul 12:10",side:"Sell",price:"$31.00",amt:"5 INJ",filled:"0%"},
+      {date:"20 Jul 16:00",side:"Buy", price:"$24.80",amt:"20 INJ",filled:"100%"},
+    ],
+  },
+  "TIA/USDT": {
+    label:"TIA/USDT", baseSym:"TIA", icon:"☽", color:"#7B2FBE",
+    price:8.92, chg24pct:-2.30, chgAmt:-0.210,
+    vol:"$0.2B", high24:9.40, low24:8.62,
+    vol24:"22M TIA", mktcap:"$1.8B", spreadPct:0.05,
+    amtDecimals:1, priceDecimals:3, volatility:3.5,
+    seeds:{"1H":23001,"4H":23002,"1D":23003,"1W":23004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 09:20",side:"Sell",price:"$9.50",amt:"50 TIA",filled:"40%"},
+      {date:"22 Jul 14:10",side:"Buy", price:"$8.40",amt:"100 TIA",filled:"100%"},
+      {date:"21 Jul 10:40",side:"Buy", price:"$8.00",amt:"200 TIA",filled:"100%"},
+    ],
+  },
+  "AAVE/USDT": {
+    label:"AAVE/USDT", baseSym:"AAVE", icon:"Ψ", color:"#B6509E",
+    price:92.40, chg24pct:2.10, chgAmt:1.900,
+    vol:"$0.2B", high24:96.10, low24:89.20,
+    vol24:"2.2M AAVE", mktcap:"$1.4B", spreadPct:0.03,
+    amtDecimals:3, priceDecimals:2, volatility:2.5,
+    seeds:{"1H":24001,"4H":24002,"1D":24003,"1W":24004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 08:10",side:"Buy", price:"$88.00",amt:"2 AAVE",filled:"100%"},
+      {date:"22 Jul 15:50",side:"Sell",price:"$99.00",amt:"1 AAVE",filled:"0%"},
+      {date:"21 Jul 12:00",side:"Buy", price:"$84.50",amt:"5 AAVE",filled:"100%"},
+    ],
+  },
+  "UNI/USDT": {
+    label:"UNI/USDT", baseSym:"UNI", icon:"U", color:"#FF007A",
+    price:5.02, chg24pct:1.60, chgAmt:0.0793,
+    vol:"$0.15B", high24:5.28, low24:4.84,
+    vol24:"30M UNI", mktcap:"$3.8B", spreadPct:0.04,
+    amtDecimals:1, priceDecimals:3, volatility:2.8,
+    seeds:{"1H":25001,"4H":25002,"1D":25003,"1W":25004},
+    points:{"1H":60,"4H":96,"1D":120,"1W":168},
+    orders:[
+      {date:"23 Jul 07:50",side:"Buy", price:"$4.80",amt:"100 UNI",filled:"100%"},
+      {date:"22 Jul 11:40",side:"Sell",price:"$5.50",amt:"50 UNI",filled:"0%"},
+      {date:"21 Jul 09:00",side:"Buy", price:"$4.50",amt:"200 UNI",filled:"100%"},
+    ],
+  },
 };
 
 // ── Trading Chart — takes real price series data ───────────
@@ -457,34 +785,31 @@ function makeOrderBook(price: number, spreadPct: number, priceDec: number, amtDe
 // ══════════════════════════════════════════════════════════
 //  PAGE: TRADING
 // ══════════════════════════════════════════════════════════
+// Category definitions
+const PAIR_CATEGORIES: Record<string,string[]> = {
+  "Major":   ["BTC/USDT","ETH/USDT","BNB/USDT","SOL/USDT","AVAX/USDT"],
+  "Meme":    ["DOGE/USDT","SHIB/USDT","PEPE/USDT","WIF/USDT","BONK/USDT","FLOKI/USDT"],
+  "Altcoin": ["XRP/USDT","ADA/USDT","DOT/USDT","LINK/USDT","NEAR/USDT","APT/USDT","ATOM/USDT","LTC/USDT"],
+  "DeFi":    ["AAVE/USDT","UNI/USDT"],
+  "Layer 2": ["ARB/USDT","OP/USDT","INJ/USDT","TIA/USDT"],
+};
+
 function TradingPage() {
-  const PAIR_KEYS = Object.keys(PAIR_DATA);
+  const [cat, setCat] = useState("Major");
   const [pairKey, setPairKey] = useState("BTC/USDT");
   const [tf, setTf] = useState("1D");
   const [side, setSide] = useState<"buy"|"sell">("buy");
   const [orderType, setOrderType] = useState(0);
   const [priceInput, setPriceInput] = useState("");
   const [amtInput, setAmtInput] = useState("");
+  const [showOrderForm, setShowOrderForm] = useState(false);
 
+  const catPairs = PAIR_CATEGORIES[cat] || [];
   const pd = PAIR_DATA[pairKey];
   const isUp = pd.chg24pct >= 0;
 
-  // Generate unique chart data for this pair + timeframe combo
-  const chartData = genPriceSeries(
-    pd.price,
-    pd.volatility,
-    pd.seeds[tf],
-    pd.points[tf]
-  );
-
-  // Generate order book deterministically from pair + timeframe
-  const { asks, bids } = makeOrderBook(
-    pd.price,
-    pd.spreadPct,
-    pd.priceDecimals,
-    pd.amtDecimals,
-    pd.seeds[tf]
-  );
+  const chartData = genPriceSeries(pd.price, pd.volatility, pd.seeds[tf], pd.points[tf]);
+  const { asks, bids } = makeOrderBook(pd.price, pd.spreadPct, pd.priceDecimals, pd.amtDecimals, pd.seeds[tf]);
 
   const fmtPrice = (p: number) =>
     p >= 1000
@@ -495,25 +820,51 @@ function TradingPage() {
     ? `$${(parseFloat(priceInput.replace(/,/g,"")) * parseFloat(amtInput)).toFixed(2)}`
     : "$0.00";
 
+  const handleCatChange = (c: string) => {
+    setCat(c);
+    const firstInCat = PAIR_CATEGORIES[c]?.[0];
+    if (firstInCat) { setPairKey(firstInCat); setTf("1D"); setPriceInput(""); setAmtInput(""); }
+  };
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       <SectionTitle t="Trading" sub="Advanced order execution — live market data" />
 
-      {/* Pair selector */}
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {PAIR_KEYS.map(k => {
+      {/* Category tabs */}
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        {Object.keys(PAIR_CATEGORIES).map(c => (
+          <button key={c} onClick={() => handleCatChange(c)}
+            style={{ padding: "7px 16px", background: cat === c ? "rgba(255,149,0,.15)" : "rgba(255,255,255,.04)",
+              border: cat === c ? "1px solid rgba(255,149,0,.35)" : "1px solid rgba(255,255,255,.07)",
+              borderRadius: 20, color: cat === c ? "#FF9500" : "#555", fontSize: 11,
+              fontFamily: "'DM Mono',monospace", fontWeight: cat === c ? 600 : 400, cursor: "pointer",
+              letterSpacing: ".04em", transition: "all .15s" }}>
+            {c === "Meme" ? "🐸 " : c === "DeFi" ? "⚡ " : c === "Layer 2" ? "⊛ " : c === "Major" ? "★ " : "◈ "}{c}
+          </button>
+        ))}
+      </div>
+
+      {/* Pair selector — scrollable row */}
+      <div className="hscroll pair-scroll" style={{ display: "flex", gap: 8 }}>
+        {catPairs.map(k => {
           const p = PAIR_DATA[k];
           const up = p.chg24pct >= 0;
           return (
             <button key={k} onClick={() => { setPairKey(k); setTf("1D"); setPriceInput(""); setAmtInput(""); }}
-              style={{ padding: "8px 16px", background: pairKey === k ? `${p.color}18` : "rgba(255,255,255,.04)",
+              style={{ padding: "10px 14px", background: pairKey === k ? `${p.color}18` : "rgba(255,255,255,.04)",
                 border: pairKey === k ? `1px solid ${p.color}44` : "1px solid rgba(255,255,255,.07)",
-                borderRadius: 9, color: pairKey === k ? p.color : "#666", fontSize: 12,
-                fontFamily: "'DM Mono',monospace", transition: "all .15s", cursor: "pointer" }}>
-              <span style={{ marginRight: 6 }}>{p.icon}</span>{k}
-              <span style={{ marginLeft: 8, fontSize: 10, color: up ? "#22C55E" : "#EF4444" }}>
+                borderRadius: 10, color: pairKey === k ? p.color : "#666", fontSize: 12,
+                fontFamily: "'DM Mono',monospace", transition: "all .15s", cursor: "pointer",
+                flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 3,
+                minWidth: 90 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                <span style={{ fontSize: 13 }}>{p.icon}</span>
+                <span style={{ fontWeight: 600 }}>{p.baseSym}</span>
+              </div>
+              <div style={{ fontSize: 10 }}>{fmtPrice === undefined ? "" : p.price >= 1 ? `$${p.price.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}` : `$${p.price.toFixed(p.priceDecimals)}`}</div>
+              <div style={{ fontSize: 10, color: up ? "#22C55E" : "#EF4444" }}>
                 {up ? "▲" : "▼"} {Math.abs(p.chg24pct).toFixed(1)}%
-              </span>
+              </div>
             </button>
           );
         })}
@@ -544,7 +895,7 @@ function TradingPage() {
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 300px 280px", gap: 14, alignItems: "start" }}>
+      <div className="grid-trade" style={{ display: "grid", gridTemplateColumns: "1fr 300px 280px", gap: 14, alignItems: "start" }}>
 
         {/* ── CHART ── */}
         <GlassCard>
@@ -595,7 +946,7 @@ function TradingPage() {
         </GlassCard>
 
         {/* ── ORDER BOOK ── */}
-        <GlassCard style={{ padding: "16px" }}>
+        <GlassCard style={{ padding: "16px", display:"flex", flexDirection:"column" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
             <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 13, color: "#E0E0E0" }}>Order Book</div>
             <Badge c={pd.color} label={pd.label} />
@@ -806,7 +1157,7 @@ function WalletPage() {
   return (
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
       <SectionTitle t="Wallet" sub="Manage your digital assets"/>
-      <div style={{display:"grid",gridTemplateColumns:"220px 1fr",gap:14}}>
+      <div style={{display:"grid",gridTemplateColumns:"220px 1fr",gap:14}} className="grid-2col">
         {/* Asset list */}
         <div className="card" style={{padding:"14px",display:"flex",flexDirection:"column",gap:4}}>
           <div style={{fontSize:9,color:"#333",letterSpacing:".14em",marginBottom:8,fontFamily:"'DM Mono',monospace"}}>MY ASSETS</div>
@@ -913,7 +1264,7 @@ function LoansPage() {
   return (
     <div style={{display:"flex",flexDirection:"column",gap:18}}>
       <SectionTitle t="Loans" sub="Borrow against your crypto collateral"/>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}} className="grid-4col">
         {[{l:"Total Borrowed",v:"$15,500",c:"#EF4444"},{l:"Total Collateral",v:"$24,800",c:"#F7931A"},{l:"Net Position",v:"$9,300",c:"#22C55E"}].map((s,i)=>(
           <GlassCard key={s.l} anim={i}>
             <div style={{fontSize:9,color:"#333",letterSpacing:".12em",marginBottom:7,fontFamily:"'DM Mono',monospace"}}>{s.l}</div>
@@ -982,7 +1333,7 @@ function VaultsPage() {
   return (
     <div style={{display:"flex",flexDirection:"column",gap:18}}>
       <SectionTitle t="Vaults" sub="Earn yield on your idle assets"/>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}} className="grid-4col">
         {[{l:"Total Deposited",v:"$28,400"},{l:"Total Earned",v:"$2,140"},{l:"Avg APY",v:"11.9%"},{l:"Active Vaults",v:"3"}].map((s,i)=>(
           <GlassCard key={s.l} anim={i}>
             <div style={{fontSize:9,color:"#333",letterSpacing:".12em",marginBottom:7,fontFamily:"'DM Mono',monospace"}}>{s.l}</div>
@@ -990,7 +1341,7 @@ function VaultsPage() {
           </GlassCard>
         ))}
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12}} className="grid-4col">
         {vaults.map((v,i)=>(
           <div key={i} className="card" style={{padding:"20px",animation:`fadeUp .35s ease ${i*.05}s both`}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
@@ -1043,7 +1394,7 @@ function PortfolioPage() {
   return (
     <div style={{display:"flex",flexDirection:"column",gap:18}}>
       <SectionTitle t="Portfolio" sub="Track your overall performance"/>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}} className="grid-4col">
         {perf.map((p,i)=>(
           <GlassCard key={p.period} anim={i}>
             <div style={{fontSize:9,color:"#333",letterSpacing:".12em",marginBottom:7,fontFamily:"'DM Mono',monospace"}}>{p.period}</div>
@@ -1052,7 +1403,7 @@ function PortfolioPage() {
           </GlassCard>
         ))}
       </div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 340px",gap:14}}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 340px",gap:14}} className="grid-port">
         <GlassCard>
           <div style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,color:"#E0E0E0",marginBottom:6}}>Portfolio Value Over Time</div>
           <div style={{fontSize:11,color:"#333",fontFamily:"'DM Mono',monospace",marginBottom:14}}>Total: <span style={{color:"#22C55E",fontWeight:600}}>$47,570.42</span></div>
@@ -1118,7 +1469,7 @@ function LiquidityPage() {
   return (
     <div style={{display:"flex",flexDirection:"column",gap:18}}>
       <SectionTitle t="Liquidity Pools" sub="Provide liquidity and earn trading fees"/>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12}} className="grid-4col">
         {[{l:"My Liquidity",v:"$4,400",c:"#22C55E"},{l:"Total Earned",v:"$320.40",c:"#22C55E"},{l:"Active Positions",v:"3",c:"#E0E0E0"},{l:"Avg APY",v:"26.8%",c:"#F7931A"}].map((s,i)=>(
           <GlassCard key={s.l} anim={i}>
             <div style={{fontSize:9,color:"#333",letterSpacing:".12em",marginBottom:7,fontFamily:"'DM Mono',monospace"}}>{s.l}</div>
@@ -1128,7 +1479,7 @@ function LiquidityPage() {
       </div>
       <GlassCard>
         <div style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,color:"#E0E0E0",marginBottom:14}}>Available Pools</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}} className="grid-3col">
           {pools.map((p,i)=>(
             <div key={i} className="card ti" style={{padding:"18px",cursor:"pointer",animation:`fadeUp .3s ease ${i*.05}s both`}}>
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
@@ -1321,7 +1672,7 @@ function ProfilePage() {
       </div>
 
       {activeTab==="overview"&&(
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}} className="grid-2col">
           <GlassCard>
             <div style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,color:"#E0E0E0",marginBottom:14}}>Personal Information</div>
             {[{l:"Full Name",v:"Austin Robertson"},{l:"Email",v:"austin@example.com"},{l:"Phone",v:"+1 (555) 204-1234"},{l:"Location",v:"New York, USA"},{l:"Timezone",v:"UTC-5 (EST"},{l:"Language",v:"English"}].map(f=>(
@@ -1359,7 +1710,7 @@ function ProfilePage() {
       )}
 
       {activeTab==="security"&&(
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}} className="grid-2col">
           <GlassCard>
             <div style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,color:"#E0E0E0",marginBottom:14}}>Security Settings</div>
             {[{l:"Two-Factor Auth",v:"Enabled",c:"#22C55E",icon:"✓"},{l:"Biometric Login",v:"Enabled",c:"#22C55E",icon:"✓"},{l:"Login Alerts",v:"Enabled",c:"#22C55E",icon:"✓"},{l:"Withdrawal Whitelist",v:"Disabled",c:"#EF4444",icon:"✗"},{l:"API Access",v:"Read Only",c:"#F7931A",icon:"◎"}].map((s,i)=>(
@@ -1395,7 +1746,7 @@ function ProfilePage() {
       )}
 
       {activeTab==="preferences"&&(
-        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}} className="grid-2col">
           <GlassCard>
             <div style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:14,color:"#E0E0E0",marginBottom:14}}>Display Preferences</div>
             {[{l:"Currency",opts:["USD","EUR","GBP","JPY"],sel:"USD"},{l:"Theme",opts:["Dark","Light","System"],sel:"Dark"},{l:"Chart Type",opts:["Candlestick","Line","Bar"],sel:"Line"},{l:"Time Format",opts:["12H","24H"],sel:"24H"}].map(p=>(
@@ -1456,15 +1807,25 @@ function ProfilePage() {
 // ══════════════════════════════════════════════════════════
 //  ROOT APP
 // ══════════════════════════════════════════════════════════
+// ── mobile bottom nav items (subset) ─────────────────────
+const BOT_NAV = [
+  {icon:"◎",label:"Markets"},
+  {icon:"⚡",label:"Trading"},
+  {icon:"◈",label:"Wallet"},
+  {icon:"◐",label:"Portfolio"},
+  {icon:"⇄",label:"Swap"},
+];
+
 export default function App() {
   const [page,setPage]=useState("Wallet");
   const [showProfile,setShowProfile]=useState(false);
   const [collapsed,setCollapsed]=useState(false);
+  const [mobDrawer,setMobDrawer]=useState(false);
   const [orbColor,setOrbColor]=useState("#F7931A");
 
   useEffect(()=>{bootstrap();},[]);
 
-  const handleNav=(label:string)=>{setPage(label);setShowProfile(false);};
+  const handleNav=(label:string)=>{setPage(label);setShowProfile(false);setMobDrawer(false);};
   const activePage=showProfile?"Profile":page;
 
   const renderPage=()=>{
@@ -1482,6 +1843,34 @@ export default function App() {
     }
   };
 
+  // ── shared sidebar nav JSX (used in both desktop + mobile drawer) ──
+  const SidebarNav = ({onClose}:{onClose?:()=>void}) => (
+    <>
+      <div style={{fontSize:9,letterSpacing:".14em",color:"#2a2a2a",padding:"10px 8px 5px",fontWeight:600}}>PAGES</div>
+      <nav style={{display:"flex",flexDirection:"column",gap:2,padding:"0 6px"}}>
+        {NAV.map(item=>(
+          <button key={item.label} className={`nb${activePage===item.label&&!showProfile?" act":""}`}
+            onClick={()=>{handleNav(item.label);onClose&&onClose();}}
+            style={{display:"flex",alignItems:"center",gap:9,padding:"9px 10px",background:"none",border:"1px solid transparent",borderRadius:9,color:"#4a4a4a",fontSize:12,fontFamily:"'Syne',sans-serif",fontWeight:500,textAlign:"left",width:"100%"}}>
+            <span style={{fontSize:15,flexShrink:0,width:20,textAlign:"center"}}>{item.icon}</span>
+            <span style={{flex:1}}>{item.label}</span>
+            <span className="nbadge" style={{background:"rgba(255,255,255,.06)",borderRadius:5,padding:"1px 6px",fontSize:9,color:"#444",fontFamily:"'DM Mono',monospace"}}>1</span>
+            <span style={{color:"#333",fontSize:11}}>›</span>
+          </button>
+        ))}
+      </nav>
+      <div style={{fontSize:9,letterSpacing:".14em",color:"#2a2a2a",padding:"14px 8px 5px",fontWeight:600}}>UI ELEMENTS</div>
+      <nav style={{display:"flex",flexDirection:"column",gap:2,padding:"0 6px"}}>
+        {NAV_UI.map(item=>(
+          <button key={item.label} className="nb" style={{display:"flex",alignItems:"center",gap:9,padding:"9px 10px",background:"none",border:"1px solid transparent",borderRadius:9,color:"#4a4a4a",fontSize:12,fontFamily:"'Syne',sans-serif",fontWeight:500,textAlign:"left",width:"100%"}}>
+            <span style={{fontSize:13,flexShrink:0,width:20,textAlign:"center"}}>{item.icon}</span>
+            <span style={{flex:1}}>{item.label}</span>
+          </button>
+        ))}
+      </nav>
+    </>
+  );
+
   return (
     <div style={{display:"flex",height:"100vh",background:"#020305",color:"#E0E0E0",fontFamily:"'Syne','DM Mono',sans-serif",overflow:"hidden",position:"relative"}}>
 
@@ -1492,9 +1881,35 @@ export default function App() {
         <div style={{position:"absolute",width:350,height:350,top:"45%",left:"48%",borderRadius:"50%",filter:"blur(90px)",background:"radial-gradient(circle,rgba(16,185,129,.07) 0%,transparent 70%)",animation:"orb3 22s ease-in-out infinite",willChange:"transform"}}/>
       </div>
 
-      {/* ── SIDEBAR ── */}
-      <aside style={{position:"relative",zIndex:10,width:collapsed?64:200,background:"rgba(4,5,8,.92)",backdropFilter:"blur(24px)",borderRight:"1px solid rgba(255,255,255,.055)",display:"flex",flexDirection:"column",overflow:"hidden",transition:"width .28s cubic-bezier(.4,0,.2,1)",flexShrink:0}}>
-        {/* Logo */}
+      {/* ══ MOBILE DRAWER OVERLAY ══ */}
+      {mobDrawer&&(
+        <>
+          <div className="mob-overlay" onClick={()=>setMobDrawer(false)}/>
+          <div className="mob-drawer">
+            <div style={{display:"flex",alignItems:"center",gap:9,padding:"16px 14px",borderBottom:"1px solid rgba(255,255,255,.05)"}}>
+              <div style={{width:30,height:30,background:"linear-gradient(135deg,#FF6B00,#CC2200)",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(255,107,0,.4)"}}>
+                <svg width="13" height="13" viewBox="0 0 24 24"><polygon points="12,2 22,20 2,20" fill="#FF6B00"/><polygon points="12,8 19,20 5,20" fill="#000" opacity=".35"/></svg>
+              </div>
+              <span style={{flex:1,fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:18,letterSpacing:"-1px",background:"linear-gradient(135deg,#FF9500,#FF3300)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>extej</span>
+              <button onClick={()=>setMobDrawer(false)} style={{background:"none",border:"none",color:"#666",fontSize:20,lineHeight:1}}>✕</button>
+            </div>
+            <div style={{overflowY:"auto",flex:1,paddingBottom:16}}>
+              <SidebarNav onClose={()=>setMobDrawer(false)}/>
+            </div>
+            <button onClick={()=>{setShowProfile(true);setMobDrawer(false);}} style={{display:"flex",alignItems:"center",gap:9,padding:"14px",borderTop:"1px solid rgba(255,255,255,.05)",background:showProfile?"rgba(255,149,0,.07)":"none",border:"none",width:"100%",cursor:"pointer"}}>
+              <div style={{width:32,height:32,borderRadius:"50%",background:"#0a0a0f",border:"1.5px solid #FF9500",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700,color:"#FF9500",flexShrink:0}}>AR</div>
+              <div style={{flex:1,textAlign:"left"}}>
+                <div style={{fontSize:11,fontWeight:600,color:"#D0D0D0"}}>Austin Robertson</div>
+                <div style={{fontSize:9,color:"#444",marginTop:1}}>Marketing Admin</div>
+              </div>
+              <div style={{width:7,height:7,borderRadius:"50%",background:"#22C55E",boxShadow:"0 0 6px #22C55E"}}/>
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ══ DESKTOP SIDEBAR ══ */}
+      <aside className="desk-sidebar" style={{position:"relative",zIndex:10,width:collapsed?64:200,background:"rgba(4,5,8,.92)",backdropFilter:"blur(24px)",borderRight:"1px solid rgba(255,255,255,.055)",display:"flex",flexDirection:"column",overflow:"hidden",transition:"width .28s cubic-bezier(.4,0,.2,1)",flexShrink:0}}>
         <div style={{display:"flex",alignItems:"center",gap:9,padding:"18px 13px 15px",borderBottom:"1px solid rgba(255,255,255,.05)",flexShrink:0}}>
           <div style={{width:33,height:33,background:"linear-gradient(135deg,#FF6B00,#CC2200)",borderRadius:9,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:"0 4px 14px rgba(255,107,0,.4)"}}>
             <svg width="15" height="15" viewBox="0 0 24 24"><polygon points="12,2 22,20 2,20" fill="#FF6B00"/><polygon points="12,8 19,20 5,20" fill="#000" opacity=".35"/></svg>
@@ -1502,40 +1917,19 @@ export default function App() {
           {!collapsed&&<span style={{flex:1,fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:19,letterSpacing:"-1px",background:"linear-gradient(135deg,#FF9500,#FF3300)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>extej</span>}
           <button className="nb" onClick={()=>setCollapsed(!collapsed)} style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.07)",borderRadius:7,color:"#666",width:23,height:23,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,flexShrink:0}}>{collapsed?"›":"‹"}</button>
         </div>
-
-        <div style={{flex:1,overflowY:"auto",overflowX:"hidden",padding:"6px"}}>
-          {!collapsed&&<div style={{fontSize:9,letterSpacing:".14em",color:"#2a2a2a",padding:"10px 8px 5px",fontWeight:600}}>PAGES</div>}
-          <nav style={{display:"flex",flexDirection:"column",gap:2}}>
-            {NAV.map(item=>(
-              <button key={item.label} className={`nb${activePage===item.label&&!showProfile?" act":""}`}
-                onClick={()=>handleNav(item.label)}
-                title={collapsed?item.label:undefined}
-                style={{display:"flex",alignItems:"center",gap:9,padding:"8px 9px",background:"none",border:"1px solid transparent",borderRadius:9,color:"#4a4a4a",fontSize:12,fontFamily:"'Syne',sans-serif",fontWeight:500,textAlign:"left",width:"100%",whiteSpace:"nowrap",overflow:"hidden"}}>
-                <span style={{fontSize:14,flexShrink:0,width:18,textAlign:"center"}}>{item.icon}</span>
-                {!collapsed&&<><span style={{flex:1}}>{item.label}</span><span className="nbadge" style={{background:"rgba(255,255,255,.06)",borderRadius:5,padding:"1px 6px",fontSize:10,color:"#444",fontFamily:"'DM Mono',monospace"}}>1</span><span style={{color:"#333",fontSize:11}}>›</span></>}
-              </button>
-            ))}
-          </nav>
-          {!collapsed&&<div style={{fontSize:9,letterSpacing:".14em",color:"#2a2a2a",padding:"14px 8px 5px",fontWeight:600}}>UI ELEMENTS</div>}
-          <nav style={{display:"flex",flexDirection:"column",gap:2,marginTop:collapsed?8:0}}>
-            {NAV_UI.map(item=>(
-              <button key={item.label} className="nb" style={{display:"flex",alignItems:"center",gap:9,padding:"8px 9px",background:"none",border:"1px solid transparent",borderRadius:9,color:"#4a4a4a",fontSize:12,fontFamily:"'Syne',sans-serif",fontWeight:500,textAlign:"left",width:"100%",whiteSpace:"nowrap",overflow:"hidden"}} title={collapsed?item.label:undefined}>
-                <span style={{fontSize:13,flexShrink:0,width:18,textAlign:"center"}}>{item.icon}</span>
-                {!collapsed&&<span style={{flex:1}}>{item.label}</span>}
-              </button>
-            ))}
-          </nav>
-          {!collapsed&&<>
-            <div style={{fontSize:9,letterSpacing:".14em",color:"#2a2a2a",padding:"14px 8px 5px",fontWeight:600}}>DOCS</div>
-            <button className="nb" style={{display:"flex",alignItems:"center",gap:9,padding:"8px 9px",background:"none",border:"1px solid transparent",borderRadius:9,color:"#4a4a4a",fontSize:12,fontFamily:"'Syne',sans-serif",fontWeight:500,textAlign:"left",width:"100%"}}>
-              <span style={{fontSize:13,flexShrink:0,width:18,textAlign:"center"}}>◉</span>
-              <span style={{flex:1}}>Documentation</span>
-              <span style={{color:"#333",fontSize:11}}>›</span>
-            </button>
-          </>}
+        <div style={{flex:1,overflowY:"auto",overflowX:"hidden",padding:"4px"}}>
+          {!collapsed ? <SidebarNav/> : (
+            <nav style={{display:"flex",flexDirection:"column",gap:2,padding:"4px"}}>
+              {NAV.map(item=>(
+                <button key={item.label} className={`nb${activePage===item.label?" act":""}`}
+                  onClick={()=>handleNav(item.label)} title={item.label}
+                  style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"9px",background:"none",border:"1px solid transparent",borderRadius:9,color:"#4a4a4a",fontSize:14,width:"100%"}}>
+                  {item.icon}
+                </button>
+              ))}
+            </nav>
+          )}
         </div>
-
-        {/* Profile bottom */}
         {!collapsed&&(
           <button onClick={()=>setShowProfile(true)} style={{display:"flex",alignItems:"center",gap:9,padding:"12px",borderTop:"1px solid rgba(255,255,255,.05)",background:showProfile?"rgba(255,149,0,.07)":"none",border:"none",width:"100%",cursor:"pointer",flexShrink:0,transition:"background .15s"}}>
             <div style={{width:32,height:32,borderRadius:"50%",background:"linear-gradient(135deg,#1a1a1a,#2d2d2d)",border:"1.5px solid #FF9500",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700,color:"#FF9500",flexShrink:0}}>AR</div>
@@ -1548,11 +1942,11 @@ export default function App() {
         )}
       </aside>
 
-      {/* ── MAIN ── */}
+      {/* ══ MAIN ══ */}
       <main style={{flex:1,position:"relative",zIndex:5,display:"flex",flexDirection:"column",overflow:"hidden"}}>
-        {/* Ticker */}
-        <div style={{height:30,borderBottom:"1px solid rgba(255,255,255,.04)",overflow:"hidden",background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",flexShrink:0}}>
-          <div style={{display:"flex",alignItems:"center",whiteSpace:"nowrap",animation:"ticker 32s linear infinite",willChange:"transform"}}>
+        {/* Ticker — hidden on mobile */}
+        <div className="ticker-bar" style={{height:30,borderBottom:"1px solid rgba(255,255,255,.04)",overflow:"hidden",background:"rgba(0,0,0,.55)",display:"flex",alignItems:"center",flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",whiteSpace:"nowrap",animation:"ticker 28s linear infinite",willChange:"transform"}}>
             {[...TICKER_DATA,...TICKER_DATA,...TICKER_DATA].map((t,i)=>(
               <span key={i} style={{fontSize:11,fontFamily:"'DM Mono',monospace",display:"inline-flex",alignItems:"center"}}>
                 <span style={{color:"#444"}}>{t.sym}</span>
@@ -1565,41 +1959,69 @@ export default function App() {
         </div>
 
         {/* Header */}
-        <header style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 22px",borderBottom:"1px solid rgba(255,255,255,.05)",background:"rgba(4,5,8,.75)",backdropFilter:"blur(12px)",flexShrink:0}}>
-          <div>
-            <div style={{fontSize:11,marginBottom:3,fontFamily:"'DM Mono',monospace"}}>
-              <span style={{color:"#444"}}>Dashboard</span>
-              <span style={{color:"#2a2a2a"}}> / </span>
-              <span style={{color:"#777"}}>{activePage}</span>
+        <header style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 16px",borderBottom:"1px solid rgba(255,255,255,.05)",background:"rgba(4,5,8,.75)",backdropFilter:"blur(12px)",flexShrink:0,gap:10}}>
+          {/* Mobile hamburger */}
+          <button className="mob-menu-btn" onClick={()=>setMobDrawer(true)}
+            style={{display:"none",background:"rgba(255,255,255,.05)",border:"1px solid rgba(255,255,255,.08)",borderRadius:9,padding:"7px 9px",color:"#888",fontSize:16,flexShrink:0}}>
+            ☰
+          </button>
+          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+            <div style={{display:"flex",alignItems:"center",gap:7}}>
+              <div className="desk-header-extra" style={{fontSize:10,color:"#444",fontFamily:"'DM Mono',monospace"}}>
+                <span style={{color:"#333"}}>Dashboard / </span>{activePage}
+              </div>
+              <div className="page-title-size" style={{fontSize:17,fontWeight:800,fontFamily:"'Syne',sans-serif",letterSpacing:"-.5px",whiteSpace:"nowrap"}}>{activePage}</div>
             </div>
-            <div style={{fontSize:18,fontWeight:800,fontFamily:"'Syne',sans-serif",letterSpacing:"-.5px"}}>{activePage}</div>
           </div>
-          <div style={{display:"flex",alignItems:"center",gap:10}}>
-            <div className="glass" style={{display:"flex",alignItems:"center",gap:8,borderRadius:10,padding:"7px 13px"}}>
-              <span style={{color:"#444",fontSize:13}}>⌕</span>
-              <input placeholder="Search..." style={{background:"none",border:"none",outline:"none",color:"#888",fontSize:12,fontFamily:"'DM Mono',monospace",width:160}}/>
-            </div>
-            <button className="glass" style={{position:"relative",background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,padding:"7px 10px",fontSize:14,color:"#666"}}>
-              🔔<div style={{position:"absolute",top:7,right:7,width:6,height:6,borderRadius:"50%",background:"#FF9500",boxShadow:"0 0 6px #FF9500"}}/>
+          <div style={{flex:1}}/>
+          {/* Search — hidden on mobile */}
+          <div className="header-search-wrap glass" style={{display:"flex",alignItems:"center",gap:8,borderRadius:10,padding:"7px 13px"}}>
+            <span style={{color:"#444",fontSize:13}}>⌕</span>
+            <input placeholder="Search..." style={{background:"none",border:"none",outline:"none",color:"#888",fontSize:12,fontFamily:"'DM Mono',monospace",width:150}}/>
+          </div>
+          {/* Icons */}
+          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+            <button className="glass" style={{position:"relative",background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,padding:"7px 10px",fontSize:14,color:"#666",flexShrink:0}}>
+              🔔<div style={{position:"absolute",top:6,right:6,width:6,height:6,borderRadius:"50%",background:"#FF9500",boxShadow:"0 0 6px #FF9500"}}/>
             </button>
-            <button className="glass" style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,padding:"7px 10px",fontSize:14,color:"#666"}}>✉</button>
-            {/* Avatar – click to show profile */}
+            <button className="glass desk-header-extra" style={{background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",borderRadius:10,padding:"7px 10px",fontSize:14,color:"#666"}}>✉</button>
             <button onClick={()=>setShowProfile(!showProfile)} style={{position:"relative",background:"none",border:"none",cursor:"pointer",flexShrink:0}}>
               <div style={{position:"absolute",inset:-2,borderRadius:"50%",border:`2px solid ${showProfile?"#FF9500":"#333"}`,transition:"border-color .2s",zIndex:1}}/>
-              <div style={{width:36,height:36,borderRadius:"50%",background:"#0a0a0f",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#FF9500",border:"2px solid #FF9500"}}>AR</div>
+              <div style={{width:34,height:34,borderRadius:"50%",background:"#0a0a0f",display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:"#FF9500",border:"2px solid #FF9500"}}>AR</div>
             </button>
-            <div>
-              <div style={{fontSize:12,fontWeight:600,color:"#E0E0E0"}}>Austin Robertson</div>
+            <div className="desk-header-extra">
+              <div style={{fontSize:12,fontWeight:600,color:"#E0E0E0",whiteSpace:"nowrap"}}>Austin Robertson</div>
               <div style={{fontSize:10,color:"#444",marginTop:1}}>Marketing Administrator</div>
             </div>
           </div>
         </header>
 
         {/* Page content */}
-        <div style={{flex:1,overflowY:"auto",padding:"18px 22px"}}>
+        <div className="main-content-pad" style={{flex:1,overflowY:"auto",padding:"16px 20px"}}>
           {renderPage()}
         </div>
       </main>
+
+      {/* ══ MOBILE BOTTOM NAV ══ */}
+      <nav className="bot-nav">
+        <div className="bot-nav-inner">
+          {BOT_NAV.map(item=>{
+            const isAct = activePage===item.label && !showProfile;
+            return (
+              <button key={item.label} className={`bot-btn${isAct?" act":""}`}
+                onClick={()=>handleNav(item.label)}>
+                <div className="bot-icon">{item.icon}</div>
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+          <button className={`bot-btn${showProfile?" act":""}`}
+            onClick={()=>setShowProfile(!showProfile)}>
+            <div className="bot-icon" style={{background:showProfile?"rgba(255,149,0,.15)":"none",border:showProfile?"1px solid rgba(255,149,0,.3)":"1px solid transparent",fontSize:12,fontWeight:700,color:showProfile?"#FF9500":"#444"}}>AR</div>
+            <span>Profile</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }
